@@ -1,0 +1,25 @@
+#!/bin/sh
+
+VERSION=1.1
+DEST=mpp-${VERSION}
+SRC="bmp2mpp.c mpp2bmp.c pixbuf.c pixbuf.h \
+  mppview.s mppdec.s mode0.s mode1.s mode2.s mode3.s"
+WCC=i686-w64-mingw32-gcc
+
+mkdir -p ${DEST}/src || exit 1
+cp ${SRC} ${DEST}/src || exit 1
+cp README COPYING Changelog ${DEST} || exit 1
+
+make clean
+make mppview.tos || exit 1
+cp mppview.tos ${DEST}/mppview.ttp
+
+make CC=$WCC CFLAGS=-O3 || exit 1
+cp mpp2bmp ${DEST}/mpp2bmp.exe
+cp bmp2mpp ${DEST}/bmp2mpp.exe
+make clean
+
+vc -O1 bmp2mpp.c -o ${DEST}/bmp2mpp.ttp -lm || exit 1
+vc -O1 -c99 mpp2bmp.c pixbuf.c -o ${DEST}/mpp2bmp.ttp -lm
+
+exit 0
